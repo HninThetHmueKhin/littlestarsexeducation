@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Little Star - Child-Safe Education</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="mobile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Screen -->
+        <div id="welcomeScreen" class="screen active">
+            <div class="welcome-content">
+                <div class="logo-container">
+                    <div class="logo">⭐</div>
+                    <h1>Little Star</h1>
+                    <p class="subtitle">Child-Safe Education</p>
+                </div>
+                <p class="welcome-text">Welcome! I'm here to help you learn about safe and healthy topics in a fun and engaging way.</p>
+                
+                <div class="form-group">
+                    <label for="userName">What's your name?</label>
+                    <input type="text" id="userName" placeholder="Enter your name" maxlength="20">
+                </div>
+                
+                <div class="form-group">
+                    <label for="userAge">How old are you?</label>
+                    <select id="userAge">
+                        <option value="">Select your age</option>
+                        <option value="8">8 years old</option>
+                        <option value="9">9 years old</option>
+                        <option value="10">10 years old</option>
+                        <option value="11">11 years old</option>
+                        <option value="12">12 years old</option>
+                        <option value="13">13 years old</option>
+                        <option value="14">14 years old</option>
+                        <option value="15">15 years old</option>
+                    </select>
+                </div>
+                
+                <button id="startBtn" class="btn-primary">
+                    <span>🚀 Start Learning</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Chat Screen -->
+        <div id="mainScreen" class="screen">
+            <div class="chat-header">
+                <h2>Hi <span id="userDisplayName"></span>! 👋</h2>
+                <button id="topicsBtn" class="btn-secondary">📚 Topics</button>
+            </div>
+            
+            <div class="chat-container">
+                <div id="chatMessages" class="chat-messages">
+                    <div class="message bot-message">
+                        <p>Hello! I'm here to help you learn about safe and healthy topics. You can ask me questions or click the Topics button to see what we can learn about together!</p>
+                    </div>
+                </div>
+                
+                <div class="chat-input-container">
+                    <input type="text" id="chatInput" placeholder="Ask me anything..." maxlength="200">
+                    <button id="sendBtn" class="btn-send">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topics Screen -->
+        <div id="topicsScreen" class="screen">
+            <div class="topics-header">
+                <h2>📚 Learning Topics</h2>
+                <button id="backToChatBtn" class="btn-secondary">Back to Chat</button>
+            </div>
+            
+            <div id="topicsList" class="topics-list">
+                <!-- Topics will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Questions Screen -->
+        <div id="questionsScreen" class="screen">
+            <div class="questions-header">
+                <h2 id="topicTitle">Questions</h2>
+                <button id="backToTopicsBtn" class="btn-secondary">Back to Topics</button>
+            </div>
+            
+            <div id="questionsList" class="questions-list">
+                <!-- Questions will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Answer Screen -->
+        <div id="answerScreen" class="screen">
+            <div class="answer-header">
+                <h2>Answer</h2>
+                <button id="backToQuestionsBtn" class="btn-secondary">Back to Questions</button>
+            </div>
+            
+            <div class="answer-content">
+                <div class="question-display">
+                    <h3 id="questionText"></h3>
+                </div>
+                <div class="answer-display">
+                    <p id="answerText"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

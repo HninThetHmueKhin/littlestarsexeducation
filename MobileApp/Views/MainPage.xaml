@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="ChildSafeSexEducation.Mobile.Views.MainPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             Title="Little Star"
+             BackgroundColor="#E8F8F5">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Modern Header -->
+        <Border Grid.Row="0" 
+                BackgroundColor="#00D4AA" 
+                Padding="15,12">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="0,0,16,16"/>
+            </Border.StrokeShape>
+            <Grid>
+                <Label x:Name="WelcomeLabel" 
+                       FontSize="18" 
+                       FontAttributes="Bold" 
+                       TextColor="White" 
+                       VerticalOptions="Center"
+                       Margin="0,0,0,2"/>
+                <Button x:Name="TopicsButton" 
+                        Text="📚 Topics" 
+                        BackgroundColor="White" 
+                        TextColor="#00D4AA" 
+                        FontSize="12" 
+                        FontAttributes="Bold" 
+                        CornerRadius="12" 
+                        Padding="12,6" 
+                        HorizontalOptions="End" 
+                        VerticalOptions="Center"
+                        Clicked="TopicsButton_Clicked"/>
+            </Grid>
+        </Border>
+
+        <!-- Chat Messages -->
+        <ScrollView x:Name="ChatScrollView" 
+                    Grid.Row="1" 
+                    BackgroundColor="White" 
+                    Padding="15"
+                    Margin="10,0,10,0">
+            <ScrollView.StrokeShape>
+                <RoundRectangle CornerRadius="16"/>
+            </ScrollView.StrokeShape>
+            <StackLayout x:Name="ChatStackLayout" Spacing="12"/>
+        </ScrollView>
+
+        <!-- Modern Chat Input -->
+        <Border Grid.Row="2" 
+                BackgroundColor="White" 
+                Padding="15"
+                Margin="10,5,10,10">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="16,16,0,0"/>
+            </Border.StrokeShape>
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <Entry x:Name="ChatEntry" 
+                       Placeholder="Ask me anything..." 
+                       BackgroundColor="#F8F9FA" 
+                       TextColor="#2D3436" 
+                       FontSize="15" 
+                       MaxLength="200" 
+                       Completed="ChatEntry_Completed"/>
+                <Button x:Name="SendButton" 
+                        Text="Send" 
+                        BackgroundColor="#00D4AA" 
+                        TextColor="White" 
+                        FontSize="13" 
+                        FontAttributes="Bold" 
+                        CornerRadius="12" 
+                        Padding="16,8" 
+                        Grid.Column="1"
+                        Clicked="SendButton_Clicked"/>
+            </Grid>
+        </Border>
+    </Grid>
+
+</ContentPage>

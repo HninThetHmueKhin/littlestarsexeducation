@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safe Learning Chatbot - Desktop</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #a8e6cf 0%, #88d8a3 100%);
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .desktop-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .desktop-header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-bottom: 2px solid #27ae60;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .desktop-title {
+            color: #27ae60;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        
+        .desktop-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s ease;
+        }
+        
+        .control-btn:hover {
+            background: #229954;
+        }
+        
+        .desktop-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .app-frame {
+            width: 100%;
+            max-width: 1200px;
+            height: 100%;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            background: white;
+        }
+        
+        .status-bar {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #27ae60;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #27ae60;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #27ae60;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="desktop-container">
+        <div class="desktop-header">
+            <div class="desktop-title">🌟 Safe Learning Chatbot</div>
+            <div class="desktop-controls">
+                <button class="control-btn" onclick="refreshApp()">🔄 Refresh</button>
+                <button class="control-btn" onclick="openInBrowser()">🌐 Open in Browser</button>
+                <button class="control-btn" onclick="closeApp()">❌ Close</button>
+            </div>
+        </div>
+        
+        <div class="desktop-content">
+            <div id="loadingScreen" class="loading-screen">
+                <div class="loading-spinner"></div>
+                <p>Starting Safe Learning Chatbot...</p>
+                <p>Please wait while the application loads.</p>
+            </div>
+            
+            <iframe id="appFrame" class="app-frame" style="display: none;" src="http://localhost:5000"></iframe>
+        </div>
+        
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Safe Learning Chatbot</span>
+            </div>
+            <div>
+                <span id="statusText">Connecting to server...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let retryCount = 0;
+        const maxRetries = 10;
+        
+        // Initialize the desktop app
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(checkServerConnection, 2000);
+        });
+        
+        function checkServerConnection() {
+            const iframe = document.getElementById('appFrame');
+            const loadingScreen = document.getElementById('loadingScreen');
+            const statusText = document.getElementById('statusText');
+            
+            // Test if the server is running
+            fetch('http://localhost:5000/api/chat/topics/10')
+                .then(response => {
+                    if (response.ok) {
+                        // Server is running, show the app
+                        loadingScreen.style.display = 'none';
+                        iframe.style.display = 'block';
+                        statusText.textContent = 'Connected - Ready to learn!';
+                        
+                        // Load the frontend
+                        iframe.src = 'http://localhost:5000';
+                    } else {
+                        throw new Error('Server not ready');
+                    }
+                })
+                .catch(error => {
+                    retryCount++;
+                    if (retryCount < maxRetries) {
+                        statusText.textContent = `Retrying connection... (${retryCount}/${maxRetries})`;
+                        setTimeout(checkServerConnection, 3000);
+                    } else {
+                        statusText.textContent = 'Server not available. Please start the backend first.';
+                        loadingScreen.innerHTML = `
+                            <div style="text-align: center; color: #e74c3c;">
+                                <h3>⚠️ Server Not Available</h3>
+                                <p>The backend server is not running.</p>
+                                <p>Please follow these steps:</p>
+                                <ol style="text-align: left; max-width: 400px;">
+                                    <li>Open Command Prompt or PowerShell</li>
+                                    <li>Navigate to the Backend folder</li>
+                                    <li>Run: <code>dotnet run</code></li>
+                                    <li>Wait for the server to start</li>
+                                    <li>Refresh this window</li>
+                                </ol>
+                                <button class="control-btn" onclick="location.reload()" style="margin-top: 20px;">
+                                    🔄 Try Again
+                                </button>
+                            </div>
+                        `;
+                    }
+                });
+        }
+        
+        function refreshApp() {
+            const iframe = document.getElementById('appFrame');
+            if (iframe.src) {
+                iframe.src = iframe.src;
+            }
+        }
+        
+        function openInBrowser() {
+            window.open('http://localhost:5000', '_blank');
+        }
+        
+        function closeApp() {
+            if (confirm('Are you sure you want to close the Safe Learning Chatbot?')) {
+                window.close();
+            }
+        }
+        
+        // Handle window close
+        window.addEventListener('beforeunload', function(e) {
+            e.preventDefault();
+            e.returnValue = '';
+        });
+    </script>
+</body>
+</html>

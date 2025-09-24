@@ -1,0 +1,169 @@
+/* Enhanced Mobile Responsive Styles */
+@media (max-width: 768px) {
+    .container {
+        padding: 8px;
+        min-height: 100vh;
+    }
+    
+    .welcome-content {
+        padding: 25px 20px;
+        margin: 5px;
+        border-radius: 20px;
+    }
+    
+    .welcome-content h1 {
+        font-size: 1.8rem;
+    }
+    
+    .logo {
+        font-size: 3rem;
+    }
+    
+    .welcome-text {
+        font-size: 1rem;
+    }
+    
+    .form-group input,
+    .form-group select {
+        padding: 14px 16px;
+        font-size: 16px; /* Prevents zoom on iOS */
+        border-radius: 12px;
+    }
+    
+    .btn-primary {
+        padding: 14px 28px;
+        font-size: 15px;
+        width: 100%;
+        margin-top: 15px;
+    }
+    
+    .chat-header {
+        padding: 15px;
+        border-radius: 16px 16px 0 0;
+    }
+    
+    .chat-header h2 {
+        font-size: 1.2rem;
+    }
+    
+    .chat-messages {
+        min-height: 250px;
+        max-height: 400px;
+        padding: 15px;
+    }
+    
+    .message {
+        max-width: 90%;
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+    
+    .chat-input-container {
+        padding: 15px;
+        gap: 8px;
+    }
+    
+    .chat-input-container input {
+        padding: 12px 14px;
+        font-size: 15px;
+    }
+    
+    .topics-header,
+    .questions-header,
+    .answer-header {
+        padding: 15px;
+        border-radius: 16px 16px 0 0;
+    }
+    
+    .topics-list,
+    .questions-list {
+        padding: 15px;
+    }
+    
+    .topic-card,
+    .question-card {
+        padding: 15px;
+        margin-bottom: 12px;
+    }
+    
+    .answer-content {
+        padding: 20px;
+    }
+    
+    .question-display {
+        padding: 15px;
+    }
+    
+    .answer-display {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 5px;
+    }
+    
+    .welcome-content {
+        padding: 20px 15px;
+        margin: 2px;
+    }
+    
+    .welcome-content h1 {
+        font-size: 1.6rem;
+    }
+    
+    .logo {
+        font-size: 2.5rem;
+    }
+    
+    .chat-messages {
+        min-height: 200px;
+        max-height: 350px;
+    }
+    
+    .message {
+        font-size: 13px;
+        padding: 10px 14px;
+    }
+    
+    .btn-primary {
+        padding: 12px 24px;
+        font-size: 14px;
+    }
+    
+    .btn-secondary {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+    
+    .chat-input-container {
+        padding: 12px;
+    }
+    
+    .chat-input-container input {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+    .welcome-content {
+        margin: 5px;
+        padding: 15px;
+    }
+    
+    .chat-messages {
+        min-height: 150px;
+        max-height: 200px;
+    }
+    
+    .logo {
+        font-size: 2rem;
+    }
+    
+    .welcome-content h1 {
+        font-size: 1.4rem;
+    }
+}

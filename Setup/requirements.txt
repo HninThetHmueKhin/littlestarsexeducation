@@ -1,0 +1,77 @@
+# Safe Learning Chatbot - Requirements
+
+## System Requirements
+- Windows 10/11 (64-bit)
+- .NET 6.0 SDK or later
+- Modern web browser (Chrome, Firefox, Edge, Safari)
+- Internet connection (for initial setup)
+
+## Software Dependencies
+- Microsoft.AspNetCore.Cors (2.2.0)
+- System.Text.Json (7.0.3)
+
+## Installation Steps
+
+### 1. Install .NET SDK
+- Download from: https://dotnet.microsoft.com/download
+- Choose ".NET 6.0 SDK" or later
+- Run the installer and follow the instructions
+- Verify installation by opening Command Prompt and running: `dotnet --version`
+
+### 2. Run Setup Script
+- Double-click `setup.bat` in the Setup folder
+- Wait for packages to restore and build to complete
+
+### 3. Start the Application
+- Open Command Prompt or PowerShell
+- Navigate to the Backend folder: `cd Backend`
+- Run: `dotnet run`
+- Wait for "Now listening on: http://localhost:5000"
+
+### 4. Access the Application
+- **Desktop Version**: Open `Desktop/wrapper.html` in your browser
+- **Web Version**: Navigate to `http://localhost:5000`
+- **Mobile Version**: Use your phone's browser to navigate to `http://localhost:5000`
+
+## Building Executable (.exe)
+
+To create a standalone executable:
+
+```bash
+cd Backend
+dotnet publish -c Release -r win-x64 --self-contained true
+```
+
+The executable will be created in:
+`Backend/bin/Release/net6.0/win-x64/publish/`
+
+## Troubleshooting
+
+### Common Issues:
+
+1. **"dotnet command not found"**
+   - Install .NET SDK from the official website
+   - Restart Command Prompt after installation
+
+2. **"Port 5000 is already in use"**
+   - Close other applications using port 5000
+   - Or change the port in Program.cs
+
+3. **"Unable to connect to server"**
+   - Make sure the backend is running (`dotnet run`)
+   - Check firewall settings
+   - Try accessing `http://localhost:5000` directly
+
+4. **Mobile not connecting**
+   - Make sure your phone is on the same WiFi network
+   - Use your computer's IP address instead of localhost
+   - Find your IP: `ipconfig` (Windows) or `ifconfig` (Mac/Linux)
+
+## Security Features
+- Age-appropriate content filtering (8-15 years)
+- Safe response generation
+- No external API calls for sensitive content
+- Content validation and sanitization
+
+## Support
+For technical support or questions, please refer to the README.md file.
