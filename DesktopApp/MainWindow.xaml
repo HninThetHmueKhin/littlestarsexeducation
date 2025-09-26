@@ -9,6 +9,9 @@
         WindowState="Normal">
     
     <Window.Resources>
+        <!-- Font Configuration for Burmese Support -->
+        <FontFamily x:Key="AppFontFamily">Segoe UI, "Myanmar Text", "Noto Sans Myanmar", "Padauk", Arial, sans-serif</FontFamily>
+        
         <!-- Modern Color Palette -->
         <SolidColorBrush x:Key="PrimaryGreen" Color="#00D4AA"/>
         <SolidColorBrush x:Key="SecondaryGreen" Color="#00B894"/>
@@ -30,8 +33,42 @@
             <GradientStop Color="#D1F2EB" Offset="1"/>
         </LinearGradientBrush>
         
+        <!-- Global Font Style for Burmese Support -->
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+        </Style>
+        
+        <Style TargetType="Button">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+        </Style>
+        
+        <Style TargetType="TextBox">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+        </Style>
+        
+        <Style TargetType="PasswordBox">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+        </Style>
+        
+        <Style TargetType="ComboBox">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+        </Style>
+        
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+        </Style>
+        
+        <Style TargetType="CheckBox">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+        </Style>
+        
+        <Style TargetType="Label">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
+        </Style>
+        
         <!-- Modern Button Style -->
         <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="FontFamily" Value="{StaticResource AppFontFamily}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -168,6 +205,127 @@
                 </StackPanel>
             </Border>
             
+            <!-- Login Panel -->
+            <Border x:Name="LoginPanel" 
+                    Background="{StaticResource CardBackground}" 
+                    CornerRadius="16" 
+                    Padding="30" 
+                    Visibility="Collapsed"
+                    MaxWidth="500"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <Border.Effect>
+                    <DropShadowEffect Color="Gray" 
+                                    Direction="270" 
+                                    ShadowDepth="3" 
+                                    BlurRadius="12" 
+                                    Opacity="0.15"/>
+                </Border.Effect>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <!-- Login Title -->
+                    <TextBlock x:Name="LoginTitle" 
+                              Text="Welcome Back!" 
+                              FontSize="32" 
+                              FontWeight="Bold" 
+                              Foreground="{StaticResource TextDark}" 
+                              HorizontalAlignment="Center" 
+                              Margin="0,0,0,10"/>
+                    
+                    <TextBlock x:Name="LoginSubtitle" 
+                              Text="Please login to continue your learning journey" 
+                              FontSize="16" 
+                              Foreground="{StaticResource TextLight}" 
+                              HorizontalAlignment="Center" 
+                              Margin="0,0,0,30"/>
+                    
+                    <!-- Login Form -->
+                    <Grid Width="400">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock x:Name="LoginUsernameLabel" 
+                                  Text="Username:" 
+                                  Grid.Row="0" Grid.Column="0" 
+                                  FontSize="16" 
+                                  FontWeight="Bold" 
+                                  Foreground="{StaticResource TextDark}" 
+                                  VerticalAlignment="Center" 
+                                  Margin="0,0,20,15"/>
+                        <TextBox x:Name="LoginUsernameTextBox" 
+                                 Grid.Row="0" Grid.Column="1" 
+                                 FontSize="16" 
+                                 Padding="20,15" 
+                                 BorderBrush="{StaticResource PrimaryGreen}" 
+                                 BorderThickness="2" 
+                                 Margin="0,0,0,15"/>
+                        
+                        <TextBlock x:Name="LoginPasswordLabel" 
+                                  Text="Password:" 
+                                  Grid.Row="1" Grid.Column="0" 
+                                  FontSize="16" 
+                                  FontWeight="Bold" 
+                                  Foreground="{StaticResource TextDark}" 
+                                  VerticalAlignment="Center" 
+                                  Margin="0,0,20,15"/>
+                        <PasswordBox x:Name="LoginPasswordBox" 
+                                     Grid.Row="1" Grid.Column="1" 
+                                     FontSize="16" 
+                                     Padding="20,15" 
+                                     BorderBrush="{StaticResource PrimaryGreen}" 
+                                     BorderThickness="2" 
+                                     Margin="0,0,0,15"/>
+                        
+                    <Button x:Name="LoginButton" 
+                            Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                            Content="Login" 
+                            Background="{StaticResource PrimaryGreen}" 
+                            Foreground="White"
+                            FontSize="18"
+                            FontWeight="Bold"
+                            Padding="20,15" 
+                            Margin="0,20,0,20"
+                            Click="LoginButton_Click"
+                            Style="{StaticResource ModernButton}"/>
+                    
+                    <TextBlock Text="Admin: username='admin', password='admin' | User: your registered credentials" 
+                              Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                              FontSize="11" 
+                              Foreground="#95A5A6" 
+                              HorizontalAlignment="Center" 
+                              Margin="0,0,0,10"/>
+                        
+                        <TextBlock Text="Don't have an account?" 
+                                  Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
+                                  FontSize="14" 
+                                  Foreground="{StaticResource TextLight}" 
+                                  HorizontalAlignment="Center" 
+                                  Margin="0,0,0,10"/>
+                        
+                        <Button x:Name="SwitchToRegisterButton" 
+                                Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2"
+                                Content="Create New Account" 
+                                Background="Transparent" 
+                                Foreground="{StaticResource AccentBlue}"
+                                FontSize="16"
+                                FontWeight="Bold"
+                                Padding="10,5" 
+                                Margin="0,0,0,20"
+                                Click="SwitchToRegisterButton_Click"
+                                BorderThickness="0"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            
             <!-- Welcome Panel -->
             <Border x:Name="WelcomePanel" 
                     Background="{StaticResource CardBackground}" 
@@ -211,6 +369,8 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -233,16 +393,48 @@
                                  BorderThickness="2" 
                                  Margin="0,0,0,15"/>
                         
-                        <TextBlock x:Name="AgeLabel" 
-                                  Text="Your Age:" 
+                        <TextBlock x:Name="UsernameLabel" 
+                                  Text="Username:" 
                                   Grid.Row="1" Grid.Column="0" 
                                   FontSize="16" 
                                   FontWeight="Bold" 
                                   Foreground="{StaticResource TextDark}" 
                                   VerticalAlignment="Center" 
                                   Margin="0,0,20,15"/>
+                        <TextBox x:Name="UsernameTextBox" 
+                                 Grid.Row="1" Grid.Column="1" 
+                                 FontSize="16" 
+                                 Padding="20,15" 
+                                 BorderBrush="{StaticResource PrimaryGreen}" 
+                                 BorderThickness="2" 
+                                 Margin="0,0,0,15"/>
+                        
+                        <TextBlock x:Name="PasswordLabel" 
+                                  Text="Password:" 
+                                  Grid.Row="2" Grid.Column="0" 
+                                  FontSize="16" 
+                                  FontWeight="Bold" 
+                                  Foreground="{StaticResource TextDark}" 
+                                  VerticalAlignment="Center" 
+                                  Margin="0,0,20,15"/>
+                        <PasswordBox x:Name="PasswordBox" 
+                                     Grid.Row="2" Grid.Column="1" 
+                                     FontSize="16" 
+                                     Padding="20,15" 
+                                     BorderBrush="{StaticResource PrimaryGreen}" 
+                                     BorderThickness="2" 
+                                     Margin="0,0,0,15"/>
+                        
+                        <TextBlock x:Name="AgeLabel" 
+                                  Text="Your Age:" 
+                                  Grid.Row="3" Grid.Column="0" 
+                                  FontSize="16" 
+                                  FontWeight="Bold" 
+                                  Foreground="{StaticResource TextDark}" 
+                                  VerticalAlignment="Center" 
+                                  Margin="0,0,20,15"/>
                         <ComboBox x:Name="AgeComboBox" 
-                                  Grid.Row="1" Grid.Column="1" 
+                                  Grid.Row="3" Grid.Column="1" 
                                   FontSize="16" 
                                   Padding="20,15" 
                                   BorderBrush="{StaticResource PrimaryGreen}" 
@@ -251,14 +443,14 @@
                         
                         <TextBlock x:Name="ParentNameLabel" 
                                   Text="Parent/Guardian Name:" 
-                                  Grid.Row="2" Grid.Column="0" 
+                                  Grid.Row="4" Grid.Column="0" 
                                   FontSize="16" 
                                   FontWeight="Bold" 
                                   Foreground="{StaticResource TextDark}" 
                                   VerticalAlignment="Center" 
                                   Margin="0,0,20,15"/>
                         <TextBox x:Name="ParentNameTextBox" 
-                                 Grid.Row="2" Grid.Column="1" 
+                                 Grid.Row="4" Grid.Column="1" 
                                  FontSize="16" 
                                  Padding="20,15" 
                                  BorderBrush="{StaticResource PrimaryGreen}" 
@@ -267,14 +459,14 @@
                         
                         <TextBlock x:Name="ParentEmailLabel" 
                                   Text="Parent/Guardian Email:" 
-                                  Grid.Row="3" Grid.Column="0" 
+                                  Grid.Row="5" Grid.Column="0" 
                                   FontSize="16" 
                                   FontWeight="Bold" 
                                   Foreground="{StaticResource TextDark}" 
                                   VerticalAlignment="Center" 
                                   Margin="0,0,20,15"/>
                         <TextBox x:Name="ParentEmailTextBox" 
-                                 Grid.Row="3" Grid.Column="1" 
+                                 Grid.Row="5" Grid.Column="1" 
                                  FontSize="16" 
                                  Padding="20,15" 
                                  BorderBrush="{StaticResource PrimaryGreen}" 
@@ -282,14 +474,15 @@
                                  Margin="0,0,0,15"/>
                         
                         <CheckBox x:Name="EmailNotificationsCheckBox" 
-                                  Grid.Row="4" Grid.Column="1" 
+                                  Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2"
                                   Content="Enable email notifications" 
                                   FontSize="14" 
                                   Foreground="{StaticResource TextDark}" 
-                                  Margin="0,0,0,30"/>
+                                  Margin="0,0,0,30"
+                                  HorizontalAlignment="Center"/>
                         
                         <Button x:Name="StartButton" 
-                                Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" 
+                                Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2" 
                                 Content="🚀 Start Learning!" 
                                 Background="{StaticResource PrimaryGreen}" 
                                 Foreground="White"
@@ -316,6 +509,25 @@
                                 </Style>
                             </Button.Style>
                         </Button>
+                        
+                        <TextBlock Text="Already have an account?" 
+                                  Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2"
+                                  FontSize="14" 
+                                  Foreground="{StaticResource TextLight}" 
+                                  HorizontalAlignment="Center" 
+                                  Margin="0,20,0,10"/>
+                        
+                        <Button x:Name="SwitchToLoginButton" 
+                                Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2"
+                                Content="Login to Existing Account" 
+                                Background="Transparent" 
+                                Foreground="{StaticResource AccentBlue}"
+                                FontSize="16"
+                                FontWeight="Bold"
+                                Padding="10,5" 
+                                Margin="0,0,0,20"
+                                Click="SwitchToLoginButton_Click"
+                                BorderThickness="0"/>
                         </Grid>
                     </ScrollViewer>
                 </StackPanel>
@@ -401,7 +613,6 @@
                                 HorizontalAlignment="Center" 
                                 Margin="0,8,0,0">
                         <Button x:Name="TopicsButton" 
-                                Content="📚 Topics" 
                                 Background="{StaticResource PrimaryGradient}" 
                                 Foreground="White"
                                 FontSize="12"
@@ -413,7 +624,6 @@
                                 Style="{StaticResource ModernButton}"/>
                         
                         <Button x:Name="SendDailyLogButton" 
-                                Content="📧 Send Log" 
                                 Background="{StaticResource AccentBlue}" 
                                 Foreground="White"
                                 FontSize="12"
@@ -425,7 +635,6 @@
                                 Style="{StaticResource ModernButton}"/>
                         
                         <Button x:Name="TestEmailButton" 
-                                Content="🧪 Test" 
                                 Background="{StaticResource PrimaryGradient}" 
                                 Foreground="White"
                                 FontSize="12"
@@ -437,7 +646,6 @@
                                 Style="{StaticResource ModernButton}"/>
                         
                         <Button x:Name="ExitButton" 
-                                Content="🚪 Exit" 
                                 Background="{StaticResource TextDark}" 
                                 Foreground="White"
                                 FontSize="12"

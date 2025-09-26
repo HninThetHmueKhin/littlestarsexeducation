@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "title": "blog_body_awareness",
+    "description": "blog_body_awareness_desc",
+    "category": "category_body_parts",
+    "icon": "🧸",
+    "content": "blog_body_awareness_content"
+  },
+  {
+    "id": 2,
+    "title": "blog_safety_rules",
+    "description": "blog_safety_rules_desc",
+    "category": "category_personal_safety",
+    "icon": "🛡️",
+    "content": "blog_safety_rules_content"
+  },
+  {
+    "id": 3,
+    "title": "blog_growing_changes",
+    "description": "blog_growing_changes_desc",
+    "category": "category_growing_up",
+    "icon": "🌱",
+    "content": "blog_growing_changes_content"
+  },
+  {
+    "id": 4,
+    "title": "blog_healthy_friendships",
+    "description": "blog_healthy_friendships_desc",
+    "category": "category_healthy_relationships",
+    "icon": "👫",
+    "content": "blog_healthy_friendships_content"
+  },
+  {
+    "id": 5,
+    "title": "blog_talking_adults",
+    "description": "blog_talking_adults_desc",
+    "category": "category_personal_safety",
+    "icon": "👨‍👩‍👧‍👦",
+    "content": "blog_talking_adults_content"
+  },
+  {
+    "id": 6,
+    "title": "blog_body_boundaries",
+    "description": "blog_body_boundaries_desc",
+    "category": "category_personal_safety",
+    "icon": "🚫",
+    "content": "blog_body_boundaries_content"
+  }
+]

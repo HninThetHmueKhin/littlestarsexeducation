@@ -33,6 +33,30 @@ namespace ChildSafeSexEducation.Desktop.Services
             CurrentLanguage = language;
         }
 
+        // Function to capture user's language choice and return the appropriate language
+        public Language CaptureUserLanguageChoice(bool isEnglishSelected, bool isBurmeseSelected)
+        {
+            if (isEnglishSelected)
+            {
+                return Language.English;
+            }
+            else if (isBurmeseSelected)
+            {
+                return Language.Burmese;
+            }
+            else
+            {
+                // Default to English if no clear choice
+                return Language.English;
+            }
+        }
+
+        // Function to apply user's language choice
+        public void ApplyUserLanguageChoice(Language chosenLanguage)
+        {
+            SetLanguage(chosenLanguage);
+        }
+
         public string GetText(string key)
         {
             if (_translations[CurrentLanguage].TryGetValue(key, out var text))
@@ -50,8 +74,21 @@ namespace ChildSafeSexEducation.Desktop.Services
                 ["welcome_title"] = "⭐ Little Star",
                 ["welcome_subtitle"] = "A safe space to learn about growing up",
                 ["enter_name"] = "Enter your name:",
+                ["enter_username"] = "Choose a username:",
+                ["enter_password"] = "Create a password:",
                 ["select_age"] = "Select your age:",
                 ["start_button"] = "Start Learning",
+                
+                // Login Screen
+                ["login_title"] = "Welcome Back!",
+                ["login_subtitle"] = "Please login to continue your learning journey",
+                ["login_username"] = "Username:",
+                ["login_password"] = "Password:",
+                ["login_button"] = "Login",
+                ["no_account_text"] = "Don't have an account?",
+                ["create_account_button"] = "Create New Account",
+                ["have_account_text"] = "Already have an account?",
+                ["login_existing_button"] = "Login to Existing Account",
                 ["age_8"] = "8 years old",
                 ["age_9"] = "9 years old",
                 ["age_10"] = "10 years old",
@@ -64,6 +101,9 @@ namespace ChildSafeSexEducation.Desktop.Services
                 // Main Screen
                 ["main_title"] = "Little Star",
                 ["topics_button"] = "📚 Topics",
+                ["send_log_button"] = "📧 Send Log",
+                ["test_button"] = "🧪 Test",
+                ["exit_button"] = "🚪 Exit",
                 ["home_button"] = "🏠",
                 ["chat_input_placeholder"] = "Type your message here...",
                 ["send_button"] = "Send",
@@ -201,6 +241,7 @@ namespace ChildSafeSexEducation.Desktop.Services
                 // Dialog Messages
                 ["missing_information"] = "Missing Information",
                 ["missing_name_age"] = "Please enter your name and select your age.",
+                ["missing_required_fields"] = "Please fill in all required fields: name, username, password, and age.",
                 ["invalid_age"] = "Invalid Age",
                 ["invalid_age_message"] = "You must be between 8 and 15 years old to use this app.",
                 ["invalid_email"] = "Invalid Email",
@@ -235,8 +276,21 @@ namespace ChildSafeSexEducation.Desktop.Services
                 ["welcome_title"] = "🌟 လုံခြုံသော သင်ယူမှု ချတ်ဘော့",
                 ["welcome_subtitle"] = "ကြီးပြင်းလာခြင်းအကြောင်း လုံခြုံစွာ သင်ယူရန် နေရာ",
                 ["enter_name"] = "သင့်အမည်ကို ရိုက်ထည့်ပါ:",
+                ["enter_username"] = "အသုံးပြုသူအမည် ရွေးချယ်ပါ:",
+                ["enter_password"] = "စကားဝှက် ဖန်တီးပါ:",
                 ["select_age"] = "သင့်အသက်ကို ရွေးချယ်ပါ:",
                 ["start_button"] = "သင်ယူမှု စတင်ရန်",
+                
+                // Login Screen
+                ["login_title"] = "ပြန်လည်ကြိုဆိုပါတယ်!",
+                ["login_subtitle"] = "သင့်သင်ယူမှု ခရီးကို ဆက်လက်လုပ်ဆောင်ရန် ကျေးဇူးပြု၍ လော့ဂ်အင်ဝင်ပါ",
+                ["login_username"] = "အသုံးပြုသူအမည်:",
+                ["login_password"] = "စကားဝှက်:",
+                ["login_button"] = "လော့ဂ်အင်ဝင်ရန်",
+                ["no_account_text"] = "အကောင့်မရှိပါသလား?",
+                ["create_account_button"] = "အကောင့်အသစ် ဖန်တီးရန်",
+                ["have_account_text"] = "အကောင့်ရှိပြီးသားလား?",
+                ["login_existing_button"] = "ရှိပြီးသား အကောင့်သို့ လော့ဂ်အင်ဝင်ရန်",
                 ["age_8"] = "၈ နှစ်",
                 ["age_9"] = "၉ နှစ်",
                 ["age_10"] = "၁၀ နှစ်",
@@ -249,6 +303,9 @@ namespace ChildSafeSexEducation.Desktop.Services
                 // Main Screen
                 ["main_title"] = "လုံခြုံသော သင်ယူမှု ချတ်ဘော့",
                 ["topics_button"] = "📚 ခေါင်းစဉ်များ",
+                ["send_log_button"] = "📧 လော့ဂ်ပို့ရန်",
+                ["test_button"] = "🧪 စမ်းသပ်ရန်",
+                ["exit_button"] = "🚪 ထွက်ရန်",
                 ["home_button"] = "🏠",
                 ["chat_input_placeholder"] = "သင့်စာကို ဤနေရာတွင် ရိုက်ထည့်ပါ...",
                 ["send_button"] = "ပို့ရန်",
@@ -386,6 +443,7 @@ namespace ChildSafeSexEducation.Desktop.Services
                 // Dialog Messages
                 ["missing_information"] = "အချက်အလက် မပြည့်စုံပါ",
                 ["missing_name_age"] = "ကျေးဇူးပြု၍ သင့်အမည်နှင့် အသက်ကို ရွေးချယ်ပါ။",
+                ["missing_required_fields"] = "ကျေးဇူးပြု၍ လိုအပ်သော အကွက်အားလုံးကို ဖြည့်ပါ - အမည်၊ အသုံးပြုသူအမည်၊ စကားဝှက်နှင့် အသက်။",
                 ["invalid_age"] = "မမှန်ကန်သော အသက်",
                 ["invalid_age_message"] = "ဤအက်ပ်ကို အသုံးပြုရန် သင်သည် ၈ နှစ်မှ ၁၅ နှစ်ကြား ရှိရပါမည်။",
                 ["invalid_email"] = "မမှန်ကန်သော အီးမေးလ်",

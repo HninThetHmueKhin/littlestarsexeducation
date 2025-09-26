@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "title": "topic_body_parts",
+    "description": "topic_body_parts_desc",
+    "minAge": 8,
+    "maxAge": 15,
+    "icon": "🧸"
+  },
+  {
+    "id": 2,
+    "title": "topic_personal_safety",
+    "description": "topic_personal_safety_desc",
+    "minAge": 8,
+    "maxAge": 15,
+    "icon": "🛡️"
+  },
+  {
+    "id": 3,
+    "title": "topic_growing_up",
+    "description": "topic_growing_up_desc",
+    "minAge": 10,
+    "maxAge": 15,
+    "icon": "🌱"
+  },
+  {
+    "id": 4,
+    "title": "topic_friendships",
+    "description": "topic_friendships_desc",
+    "minAge": 8,
+    "maxAge": 15,
+    "icon": "👫"
+  }
+]

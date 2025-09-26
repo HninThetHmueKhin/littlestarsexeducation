@@ -6,11 +6,19 @@ namespace ChildSafeSexEducation.Desktop
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            base.OnStartup(e);
-            
-            // Set application properties
-            Current.MainWindow = new MainWindow();
-            Current.MainWindow.Show();
+            try
+            {
+                Console.WriteLine("🚀 App.OnStartup starting...");
+                base.OnStartup(e);
+                Console.WriteLine("✅ App.OnStartup completed successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error in App.OnStartup: {ex.Message}");
+                Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+                MessageBox.Show($"Application startup error: {ex.Message}", "Startup Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                throw;
+            }
         }
     }
 }

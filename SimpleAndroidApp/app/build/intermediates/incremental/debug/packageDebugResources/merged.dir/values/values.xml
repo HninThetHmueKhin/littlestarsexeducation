@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:ns1="http://schemas.android.com/tools">
+    <color name="accent_blue">#0984E3</color>
+    <color name="background_light">#F8F9FA</color>
+    <color name="black">#000000</color>
+    <color name="card_background">#FFFFFF</color>
+    <color name="light_green">#E8F8F5</color>
+    <color name="primary_green">#00D4AA</color>
+    <color name="secondary_green">#00B894</color>
+    <color name="text_dark">#2D3436</color>
+    <color name="text_light">#636E72</color>
+    <color name="white">#FFFFFF</color>
+    <string name="age_required">Please select your age.</string>
+    <string name="age_validation">You must be between 8 and 15 years old to use this app.</string>
+    <string name="app_name">Little Star</string>
+    <string name="ask_question">Ask me anything...</string>
+    <string name="back">Back</string>
+    <string name="chat">Chat</string>
+    <string name="enter_age">How old are you?</string>
+    <string name="enter_name">What\'s your name?</string>
+    <string name="name_required">Please enter your name.</string>
+    <string name="send">Send</string>
+    <string name="start_learning">Start Learning</string>
+    <string name="topics">Topics</string>
+    <string name="welcome_subtitle">Child-Safe Education</string>
+    <string name="welcome_title">Welcome to Little Star</string>
+    <style name="Theme.LittleStar" parent="Theme.Material3.DayNight">
+        
+        <item name="colorPrimary">@color/primary_green</item>
+        <item name="colorPrimaryVariant">@color/secondary_green</item>
+        <item name="colorOnPrimary">@color/white</item>
+        
+        <item name="colorSecondary">@color/accent_blue</item>
+        <item name="colorSecondaryVariant">@color/accent_blue</item>
+        <item name="colorOnSecondary">@color/white</item>
+        
+        <item name="android:statusBarColor" ns1:targetApi="l">?attr/colorPrimaryVariant</item>
+        
+        <item name="android:windowBackground">@color/light_green</item>
+    </style>
+</resources>

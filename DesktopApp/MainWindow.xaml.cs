@@ -3,15 +3,16 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using ChildSafeSexEducation.Desktop.Models;
 using ChildSafeSexEducation.Desktop.Services;
+using ChildSafeSexEducation.Desktop.Managers;
 using Microsoft.Extensions.Configuration;
 
 namespace ChildSafeSexEducation.Desktop
 {
     public partial class MainWindow : Window
     {
-        private User? _currentUser;
-        private List<Topic> _currentTopics = new();
-        private List<Question> _currentQuestions = new();
+        public User? _currentUser;
+        public List<Topic> _currentTopics = new();
+        public List<Question> _currentQuestions = new();
         private int _currentTopicId = 0;
         
         private readonly ContentService _contentService;
@@ -19,6 +20,12 @@ namespace ChildSafeSexEducation.Desktop
         private readonly LanguageService _languageService;
         private readonly LoggingService _loggingService;
         private readonly UserStorageService _userStorageService;
+
+        // Managers
+        private readonly UIManager _uiManager;
+        private readonly ContentManager _contentManager;
+        private readonly ChatManager _chatManager;
+
 
         public MainWindow()
         {
@@ -29,11 +36,22 @@ namespace ChildSafeSexEducation.Desktop
             _loggingService = new LoggingService();
             _userStorageService = new UserStorageService();
             
+            // Initialize managers
+            _uiManager = new UIManager(this, _languageService);
+            _contentManager = new ContentManager(this, _contentService, _languageService, _loggingService, _uiManager);
+            _chatManager = new ChatManager(this, _contentService, _nlpService, _languageService, _loggingService, _uiManager);
+            
             // Show language selection first
             ShowLanguageSelection();
             
             // Set up daily email sending timer
             SetupDailyEmailTimer();
+            
+            // Test encryption first
+            TestEncryption.TestPasswordEncryption();
+            
+            // Migrate existing passwords to encrypted format
+            _userStorageService.MigratePasswordsToEncrypted();
             
             // Load existing user data if available
             LoadExistingUserData();
@@ -93,11 +111,44 @@ namespace ChildSafeSexEducation.Desktop
         private void ClearFormFields()
         {
             NameTextBox.Text = "";
+            UsernameTextBox.Text = "";
+            PasswordBox.Password = "";
             AgeComboBox.SelectedIndex = -1;
             ParentNameTextBox.Text = "";
             ParentEmailTextBox.Text = "";
             EmailNotificationsCheckBox.IsChecked = false;
             Console.WriteLine("✅ Form fields cleared");
+        }
+
+        private void UpdateFormLabels()
+        {
+            _uiManager.UpdateFormLabels();
+        }
+
+        private void UpdateLoginLabels()
+        {
+            _uiManager.UpdateLoginLabels();
+        }
+
+        private void UpdateAllLabels()
+        {
+            Console.WriteLine($"🔤 UpdateAllLabels called - Current language: {_languageService.CurrentLanguage}");
+            
+            // Update form labels
+            UpdateFormLabels();
+            UpdateLoginLabels();
+            
+            // Use direct language update methods instead of translation service
+            if (_languageService.CurrentLanguage == Services.Language.English)
+            {
+                _uiManager.UpdateAllUIElementsToEnglish();
+                Console.WriteLine("✅ UpdateAllLabels - Updated to English");
+            }
+            else
+            {
+                _uiManager.UpdateAllUIElementsToBurmese();
+                Console.WriteLine("✅ UpdateAllLabels - Updated to Burmese");
+            }
         }
         
         private void EnsureButtonVisible()
@@ -115,22 +166,155 @@ namespace ChildSafeSexEducation.Desktop
             }
         }
 
+        private void LoginButton_Click(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("🔐 LoginButton_Click called!");
+            
+            var username = LoginUsernameTextBox.Text.Trim();
+            var password = LoginPasswordBox.Password.Trim();
+            
+            Console.WriteLine($"Username: '{username}'");
+            Console.WriteLine($"Password: '{"*".PadLeft(password.Length, '*')}'");
+            
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            {
+                Console.WriteLine("❌ Login validation failed - missing username or password");
+                ModernMessageBox.ShowWarning("Please enter both username and password.", "Missing Information");
+                return;
+            }
+
+            // Check for admin login first
+            if (username == "admin" && password == "admin")
+            {
+                Console.WriteLine("✅ Admin login successful");
+                // Open admin dashboard directly
+                var adminDashboard = new AdminDashboard();
+                adminDashboard.Show();
+                this.Close();
+                return;
+            }
+
+            // Validate regular user credentials
+            if (_userStorageService.ValidateUser(username, password))
+            {
+                Console.WriteLine("✅ User login successful");
+                
+                // Get user data
+                _currentUser = _userStorageService.GetUserByUsername(username);
+                if (_currentUser != null)
+                {
+                    Console.WriteLine($"✅ User loaded: {_currentUser.Name}");
+                    Console.WriteLine($"🔤 User's preferred language: '{_currentUser.PreferredLanguage}'");
+                    
+                    // Keep the current language choice from language selection page
+                    // Don't override with user preference - respect user's current choice
+                    Console.WriteLine($"🔤 Keeping current language choice: {_languageService.CurrentLanguage}");
+                    
+                    // Update all UI labels with current language
+                    if (_languageService.CurrentLanguage == Services.Language.English)
+                    {
+                        _uiManager.UpdateAllUIElementsToEnglish();
+                        Console.WriteLine("✅ Updated UI to English based on current choice");
+                    }
+                    else
+                    {
+                        _uiManager.UpdateAllUIElementsToBurmese();
+                        Console.WriteLine("✅ Updated UI to Burmese based on current choice");
+                    }
+                    
+                    // Show main interface
+                    WelcomeText.Text = $"Hi {_currentUser.Name}! 👋";
+                    if (_languageService.CurrentLanguage == Services.Language.English)
+                    {
+                        AddMessageToChat("Hello! I'm here to help you learn about safe and healthy topics. You can ask me questions or click the Topics button to see what we can learn about together!", false);
+                    }
+                    else
+                    {
+                        AddMessageToChat("မင်္ဂလာပါ! ကျွန်တော်က လုံခြုံပြီး ကျန်းမာသော အကြောင်းအရာများအကြောင်း သင်ယူရန် ကူညီပေးရန် ဤနေရာတွင် ရှိပါတယ်။ သင်မေးခွန်းများ မေးနိုင်ပြီး သို့မဟုတ် ခေါင်းစဉ်များ ခလုတ်ကို နှိပ်ပြီး ကျွန်တော်တို့ အတူတကွ သင်ယူနိုင်သော အရာများကို ကြည့်နိုင်ပါတယ်!", false);
+                    }
+                    ShowMainPanel();
+                }
+            }
+            else
+            {
+                Console.WriteLine("❌ Login failed - invalid credentials");
+                ModernMessageBox.ShowWarning("Invalid username or password. Please try again.", "Login Failed");
+                LoginPasswordBox.Password = ""; // Clear password field
+            }
+        }
+
+
+        private void SwitchToRegisterButton_Click(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("🔄 Switching to register form");
+            LoginPanel.Visibility = Visibility.Collapsed;
+            WelcomePanel.Visibility = Visibility.Visible;
+            UpdateFormLabels();
+            ClearFormFields();
+            EnsureButtonVisible();
+        }
+
+        private void SwitchToLoginButton_Click(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("🔄 Switching to login form");
+            WelcomePanel.Visibility = Visibility.Collapsed;
+            LoginPanel.Visibility = Visibility.Visible;
+            UpdateLoginLabels();
+            LoginUsernameTextBox.Text = "";
+            LoginPasswordBox.Password = "";
+        }
+
         private void StartButton_Click(object sender, RoutedEventArgs e)
         {
             Console.WriteLine("🚀 StartButton_Click called!");
             
             var name = NameTextBox.Text.Trim();
+            var username = UsernameTextBox.Text.Trim();
+            var password = PasswordBox.Password.Trim();
             var selectedItem = AgeComboBox.SelectedItem as ComboBoxItem;
             var parentEmail = ParentEmailTextBox.Text.Trim();
             
             Console.WriteLine($"Name: '{name}'");
+            Console.WriteLine($"Username: '{username}'");
+            Console.WriteLine($"Password: '{"*".PadLeft(password.Length, '*')}'");
             Console.WriteLine($"SelectedItem: {selectedItem?.Tag}");
             Console.WriteLine($"Parent Email: '{parentEmail}'");
             
-            if (string.IsNullOrEmpty(name) || selectedItem == null || selectedItem.Tag == null)
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || selectedItem == null || selectedItem.Tag == null)
             {
-                Console.WriteLine("❌ Validation failed - missing name or age");
-                ModernMessageBox.ShowWarning(_languageService.GetText("missing_name_age"), _languageService.GetText("missing_information"));
+                Console.WriteLine("❌ Validation failed - missing required fields");
+                ModernMessageBox.ShowWarning(_languageService.GetText("missing_required_fields"), _languageService.GetText("missing_information"));
+                return;
+            }
+
+            // Validate username (minimum 3 characters, alphanumeric only)
+            if (username.Length < 3)
+            {
+                Console.WriteLine("❌ Username too short");
+                ModernMessageBox.ShowWarning("Username must be at least 3 characters long.", "Invalid Username");
+                return;
+            }
+
+            if (!System.Text.RegularExpressions.Regex.IsMatch(username, @"^[a-zA-Z0-9_]+$"))
+            {
+                Console.WriteLine("❌ Username contains invalid characters");
+                ModernMessageBox.ShowWarning("Username can only contain letters, numbers, and underscores.", "Invalid Username");
+                return;
+            }
+
+            // Validate password (minimum 6 characters)
+            if (password.Length < 6)
+            {
+                Console.WriteLine("❌ Password too short");
+                ModernMessageBox.ShowWarning("Password must be at least 6 characters long.", "Invalid Password");
+                return;
+            }
+
+            // Check if username already exists
+            if (_userStorageService.UsernameExists(username))
+            {
+                Console.WriteLine("❌ Username already exists");
+                ModernMessageBox.ShowWarning($"Username '{username}' is already taken. Please choose a different username.", "Username Already Exists");
                 return;
             }
 
@@ -171,7 +355,9 @@ namespace ChildSafeSexEducation.Desktop
 
             _currentUser = new User 
             { 
-                Name = name, 
+                Name = name,
+                Username = username,
+                Password = password, // Store password (in real app, hash this)
                 Age = age,
                 ParentName = ParentNameTextBox.Text.Trim(),
                 ParentEmail = ParentEmailTextBox.Text.Trim(),
@@ -179,7 +365,8 @@ namespace ChildSafeSexEducation.Desktop
                 PreferredLanguage = _languageService.CurrentLanguage.ToString()
             };
             
-            Console.WriteLine("✅ User created successfully");
+            Console.WriteLine($"✅ User created successfully with preferred language: '{_currentUser.PreferredLanguage}'");
+            Console.WriteLine($"🔤 Current language service language: {_languageService.CurrentLanguage}");
             
             // Save user data to file
             _userStorageService.SaveUser(_currentUser);
@@ -188,7 +375,14 @@ namespace ChildSafeSexEducation.Desktop
             WelcomeText.Text = $"Hi {name}! 👋";
             
             // Add welcome message to chat
-            AddMessageToChat(_languageService.GetText("welcome_chat_message"), false);
+            if (_languageService.CurrentLanguage == Services.Language.English)
+            {
+                AddMessageToChat("Hello! I'm here to help you learn about safe and healthy topics. You can ask me questions or click the Topics button to see what we can learn about together!", false);
+            }
+            else
+            {
+                AddMessageToChat("မင်္ဂလာပါ! ကျွန်တော်က လုံခြုံပြီး ကျန်းမာသော အကြောင်းအရာများအကြောင်း သင်ယူရန် ကူညီပေးရန် ဤနေရာတွင် ရှိပါတယ်။ သင်မေးခွန်းများ မေးနိုင်ပြီး သို့မဟုတ် ခေါင်းစဉ်များ ခလုတ်ကို နှိပ်ပြီး ကျွန်တော်တို့ အတူတကွ သင်ယူနိုင်သော အရာများကို ကြည့်နိုင်ပါတယ်!", false);
+            }
             Console.WriteLine("✅ Welcome message added to chat");
             
             Console.WriteLine("🔄 Calling ShowMainPanel()...");
@@ -201,11 +395,11 @@ namespace ChildSafeSexEducation.Desktop
             if (_currentUser == null) return;
             
             _currentTopics = _contentService.GetTopicsForAge(_currentUser.Age);
-            ShowTopicsTab();
+            _contentManager.ShowTopicsTab();
             TopicsPopup.Visibility = Visibility.Visible;
             
             // Ensure topics are displayed with current language
-            DisplayTopicsInPopup();
+            _contentManager.DisplayTopicsInPopup();
         }
 
         private async void SendDailyLogButton_Click(object sender, RoutedEventArgs e)
@@ -266,6 +460,9 @@ namespace ChildSafeSexEducation.Desktop
             }
         }
 
+
+
+
         private void CloseTopicsButton_Click(object sender, RoutedEventArgs e)
         {
             TopicsPopup.Visibility = Visibility.Collapsed;
@@ -273,206 +470,21 @@ namespace ChildSafeSexEducation.Desktop
 
         private void TopicsTab_Click(object sender, RoutedEventArgs e)
         {
-            ShowTopicsTab();
+            _contentManager.ShowTopicsTab();
         }
 
         private void QuestionsTab_Click(object sender, RoutedEventArgs e)
         {
-            ShowQuestionsTab();
+            _contentManager.ShowQuestionsTab();
         }
 
         private void BlogsTab_Click(object sender, RoutedEventArgs e)
         {
-            ShowBlogsTab();
+            _contentManager.ShowBlogsTab();
         }
 
-        private void ShowTopicsTab()
-        {
-            // Update tab colors
-            TopicsTab.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(39, 174, 96));
-            QuestionsTab.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(108, 117, 125));
-            BlogsTab.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(108, 117, 125));
-            
-            TopicsContent.Children.Clear();
-            
-            foreach (var topic in _currentTopics)
-            {
-                var topicCard = new Border
-                {
-                    Background = System.Windows.Media.Brushes.White,
-                    BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(233, 236, 239)),
-                    BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(12),
-                    Padding = new Thickness(20),
-                    Margin = new Thickness(0, 0, 0, 15),
-                    Cursor = Cursors.Hand
-                };
 
-                var stackPanel = new StackPanel();
-                
-                var titleText = new TextBlock
-                {
-                    Text = $"📚 {topic.Title}",
-                    FontSize = 18,
-                    FontWeight = FontWeights.Bold,
-                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(39, 174, 96)),
-                    Margin = new Thickness(0, 0, 0, 8)
-                };
-                
-                var descText = new TextBlock
-                {
-                    Text = topic.Description,
-                    FontSize = 14,
-                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(108, 117, 125)),
-                    TextWrapping = TextWrapping.Wrap,
-                    LineHeight = 20
-                };
-                
-                stackPanel.Children.Add(titleText);
-                stackPanel.Children.Add(descText);
-                topicCard.Child = stackPanel;
-                
-                topicCard.MouseLeftButtonDown += (s, e) => SelectTopic(topic);
-                
-                TopicsContent.Children.Add(topicCard);
-            }
-        }
 
-        private void ShowQuestionsTab()
-        {
-            // Update tab colors
-            TopicsTab.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(108, 117, 125));
-            QuestionsTab.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(39, 174, 96));
-            BlogsTab.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(108, 117, 125));
-            
-            TopicsContent.Children.Clear();
-            
-            var allQuestions = new List<Question>();
-            foreach (var topic in _currentTopics)
-            {
-                var questions = _contentService.GetQuestionsForTopic(topic.Id, _currentUser.Age);
-                allQuestions.AddRange(questions);
-            }
-            
-            foreach (var question in allQuestions.Take(10)) // Show first 10 questions
-            {
-                var questionCard = new Border
-                {
-                    Background = System.Windows.Media.Brushes.White,
-                    BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(233, 236, 239)),
-                    BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(12),
-                    Padding = new Thickness(20),
-                    Margin = new Thickness(0, 0, 0, 15),
-                    Cursor = Cursors.Hand
-                };
-
-                var questionText = new TextBlock
-                {
-                    Text = $"❓ {_languageService.GetText(question.QuestionText)}",
-                    FontSize = 16,
-                    FontWeight = FontWeights.SemiBold,
-                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(39, 174, 96)),
-                    TextWrapping = TextWrapping.Wrap,
-                    LineHeight = 22
-                };
-                
-                questionCard.Child = questionText;
-                questionCard.MouseLeftButtonDown += (s, e) => ShowAnswerInChat(question);
-                
-                TopicsContent.Children.Add(questionCard);
-            }
-        }
-
-        private void ShowBlogsTab()
-        {
-            // Update tab colors
-            TopicsTab.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(108, 117, 125));
-            QuestionsTab.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(108, 117, 125));
-            BlogsTab.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(39, 174, 96));
-            
-            TopicsContent.Children.Clear();
-            
-            var blogs = new[]
-            {
-                new { Title = "blog_body_awareness", Description = "blog_body_awareness_desc", Category = "category_body_parts", Icon = "🧸" },
-                new { Title = "blog_safety_rules", Description = "blog_safety_rules_desc", Category = "category_personal_safety", Icon = "🛡️" },
-                new { Title = "blog_growing_changes", Description = "blog_growing_changes_desc", Category = "category_growing_up", Icon = "🌱" },
-                new { Title = "blog_healthy_friendships", Description = "blog_healthy_friendships_desc", Category = "category_healthy_relationships", Icon = "👫" },
-                new { Title = "blog_talking_adults", Description = "blog_talking_adults_desc", Category = "category_personal_safety", Icon = "👨‍👩‍👧‍👦" },
-                new { Title = "blog_body_boundaries", Description = "blog_body_boundaries_desc", Category = "category_personal_safety", Icon = "🚫" }
-            };
-            
-            foreach (var blog in blogs)
-            {
-                var blogCard = new Border
-                {
-                    Background = System.Windows.Media.Brushes.White,
-                    BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(233, 236, 239)),
-                    BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(12),
-                    Padding = new Thickness(20),
-                    Margin = new Thickness(0, 0, 0, 15),
-                    Cursor = Cursors.Hand
-                };
-
-                var stackPanel = new StackPanel();
-                
-                var headerStack = new StackPanel { Orientation = Orientation.Horizontal };
-                
-                var iconText = new TextBlock
-                {
-                    Text = blog.Icon,
-                    FontSize = 24,
-                    Margin = new Thickness(0, 0, 15, 0),
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                
-                var titleStack = new StackPanel();
-                
-                var categoryText = new TextBlock
-                {
-                    Text = _languageService.GetText(blog.Category),
-                    FontSize = 12,
-                    FontWeight = FontWeights.Bold,
-                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(39, 174, 96)),
-                    Margin = new Thickness(0, 0, 0, 5)
-                };
-                
-                var titleText = new TextBlock
-                {
-                    Text = _languageService.GetText(blog.Title),
-                    FontSize = 16,
-                    FontWeight = FontWeights.Bold,
-                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(44, 62, 80)),
-                    TextWrapping = TextWrapping.Wrap
-                };
-                
-                titleStack.Children.Add(categoryText);
-                titleStack.Children.Add(titleText);
-                
-                headerStack.Children.Add(iconText);
-                headerStack.Children.Add(titleStack);
-                
-                var descText = new TextBlock
-                {
-                    Text = _languageService.GetText(blog.Description),
-                    FontSize = 14,
-                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(108, 117, 125)),
-                    TextWrapping = TextWrapping.Wrap,
-                    Margin = new Thickness(0, 10, 0, 0),
-                    LineHeight = 18
-                };
-                
-                stackPanel.Children.Add(headerStack);
-                stackPanel.Children.Add(descText);
-                blogCard.Child = stackPanel;
-                
-                blogCard.MouseLeftButtonDown += (s, e) => OpenBlogPage(blog.Title, blog.Description, blog.Category);
-                
-                TopicsContent.Children.Add(blogCard);
-            }
-        }
 
         private void BackToChatButton_Click(object sender, RoutedEventArgs e)
         {
@@ -518,16 +530,7 @@ namespace ChildSafeSexEducation.Desktop
 
         private void SendMessage()
         {
-            var message = ChatInput.Text.Trim();
-            if (string.IsNullOrEmpty(message) || _currentUser == null) return;
-
-            // Add user message
-            AddMessageToChat(message, true);
-            ChatInput.Text = "";
-
-            // Direct users to click topics instead of typing
-            var response = _languageService.GetText("typing_guidance_message");
-            AddMessageToChat(response, false);
+            _chatManager.ProcessUserMessage(ChatInput.Text.Trim());
         }
 
         private void DisplayTopicsInPopup()
@@ -536,6 +539,9 @@ namespace ChildSafeSexEducation.Desktop
             
             foreach (var topic in _currentTopics)
             {
+                var translatedTitle = _languageService.GetText(topic.Title);
+                var translatedDesc = _languageService.GetText(topic.Description);
+                
                 var topicCard = new Border
                 {
                     Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(248, 249, 250)),
@@ -551,19 +557,21 @@ namespace ChildSafeSexEducation.Desktop
                 
                 var titleText = new TextBlock
                 {
-                    Text = $"📚 {_languageService.GetText(topic.Title)}",
+                    Text = $"📚 {translatedTitle}",
                     FontSize = 16,
                     FontWeight = FontWeights.Bold,
                     Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(39, 174, 96)),
-                    Margin = new Thickness(0, 0, 0, 5)
+                    Margin = new Thickness(0, 0, 0, 5),
+                    FontFamily = _uiManager.GetAppFontFamily()
                 };
                 
                 var descText = new TextBlock
                 {
-                    Text = _languageService.GetText(topic.Description),
+                    Text = translatedDesc,
                     FontSize = 12,
                     Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(108, 117, 125)),
-                    TextWrapping = TextWrapping.Wrap
+                    TextWrapping = TextWrapping.Wrap,
+                    FontFamily = _uiManager.GetAppFontFamily()
                 };
                 
                 stackPanel.Children.Add(titleText);
@@ -640,7 +648,7 @@ namespace ChildSafeSexEducation.Desktop
                 Cursor = Cursors.Hand
             };
             
-            backButton.Click += (s, e) => ShowTopicsTab();
+            backButton.Click += (s, e) => _contentManager.ShowTopicsTab();
             TopicsContent.Children.Add(backButton);
             
             // Show questions for this topic
@@ -1141,142 +1149,475 @@ namespace ChildSafeSexEducation.Desktop
             };
         }
 
-        private Border AddMessageToChat(string message, bool isUser)
+        public Border AddMessageToChat(string message, bool isUser)
         {
-            var messageBorder = new Border
-            {
-                Background = isUser ? 
-                    new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(39, 174, 96)) :
-                    new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(232, 245, 232)),
-                BorderBrush = isUser ? 
-                    new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(39, 174, 96)) :
-                    new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(195, 230, 195)),
-                BorderThickness = new Thickness(1),
-                CornerRadius = new CornerRadius(15),
-                Padding = new Thickness(15),
-                Margin = new Thickness(0, 0, 0, 15),
-                HorizontalAlignment = isUser ? HorizontalAlignment.Right : HorizontalAlignment.Left,
-                MaxWidth = 400
-            };
-
-            var messageText = new TextBlock
-            {
-                Text = message,
-                Foreground = isUser ? 
-                    System.Windows.Media.Brushes.White :
-                    new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(44, 62, 80)),
-                TextWrapping = TextWrapping.Wrap,
-                FontSize = 14
-            };
-
-            messageBorder.Child = messageText;
-            ChatPanel.Children.Add(messageBorder);
-            
-            // Scroll to bottom
-            ChatScrollViewer.ScrollToEnd();
-            
-            return messageBorder;
+            return _chatManager.AddMessageToChat(message, isUser);
         }
 
         private void ShowMainPanel()
         {
-            Console.WriteLine("🔄 ShowMainPanel() called");
-            Console.WriteLine($"WelcomePanel visibility before: {WelcomePanel.Visibility}");
-            Console.WriteLine($"MainPanel visibility before: {MainPanel.Visibility}");
+            if (WelcomePanel == null || MainPanel == null)
+            {
+                return;
+            }
             
+            Console.WriteLine($"🔍 ShowMainPanel - Current language: {_languageService.CurrentLanguage}");
+            
+            // Hide all other panels to prevent overlapping
+            LanguagePanel.Visibility = Visibility.Collapsed;
+            LoginPanel.Visibility = Visibility.Collapsed;
             WelcomePanel.Visibility = Visibility.Collapsed;
+            TopicsPopup.Visibility = Visibility.Collapsed;
+            BlogsPanel.Visibility = Visibility.Collapsed;
+            
+            // Show only the main panel
             MainPanel.Visibility = Visibility.Visible;
             
-            Console.WriteLine($"WelcomePanel visibility after: {WelcomePanel.Visibility}");
-            Console.WriteLine($"MainPanel visibility after: {MainPanel.Visibility}");
+            // Update ALL UI elements to the current language using direct methods
+            if (_languageService.CurrentLanguage == Services.Language.English)
+            {
+                _uiManager.UpdateAllUIElementsToEnglish();
+                Console.WriteLine("✅ Main panel updated to English");
+            }
+            else
+            {
+                _uiManager.UpdateAllUIElementsToBurmese();
+                Console.WriteLine("✅ Main panel updated to Burmese");
+            }
             
-            // Update button text with current language
-            SendDailyLogButton.Content = _languageService.GetText("send_daily_log");
-            Console.WriteLine("✅ ShowMainPanel() completed");
+            // Add welcome message to chat in the current language
+            if (ChatPanel != null)
+            {
+                ChatPanel.Children.Clear();
+                _chatManager.AddWelcomeMessage();
+            }
         }
 
         private void ShowLanguageSelection()
         {
             LanguagePanel.Visibility = Visibility.Visible;
+            LoginPanel.Visibility = Visibility.Collapsed;
             WelcomePanel.Visibility = Visibility.Collapsed;
             MainPanel.Visibility = Visibility.Collapsed;
             TopicsPopup.Visibility = Visibility.Collapsed;
             BlogsPanel.Visibility = Visibility.Collapsed;
+            
+            // Reset button styles to default state for clear visibility
+            ResetLanguageButtonStyles();
+        }
+        
+        private void ResetLanguageButtonStyles()
+        {
+            _uiManager.ResetLanguageButtonStyles();
+        }
+
+        private void ShowLoginOrRegister()
+        {
+            // Check if any users exist
+            var existingUsers = _userStorageService.GetAllUsers();
+            
+            if (existingUsers.Any())
+            {
+                // Show login form first
+                Console.WriteLine("📋 Users exist - showing login form");
+                LanguagePanel.Visibility = Visibility.Collapsed;
+                LoginPanel.Visibility = Visibility.Visible;
+                WelcomePanel.Visibility = Visibility.Collapsed;
+                MainPanel.Visibility = Visibility.Collapsed;
+                TopicsPopup.Visibility = Visibility.Collapsed;
+                BlogsPanel.Visibility = Visibility.Collapsed;
+                UpdateLoginLabels();
+            }
+            else
+            {
+                // Show registration form first
+                Console.WriteLine("📋 No users exist - showing registration form");
+                LanguagePanel.Visibility = Visibility.Collapsed;
+                LoginPanel.Visibility = Visibility.Collapsed;
+                WelcomePanel.Visibility = Visibility.Visible;
+                MainPanel.Visibility = Visibility.Collapsed;
+                TopicsPopup.Visibility = Visibility.Collapsed;
+                BlogsPanel.Visibility = Visibility.Collapsed;
+                UpdateFormLabels();
+                ClearFormFields();
+                EnsureButtonVisible();
+            }
         }
 
         private void EnglishButton_Click(object sender, RoutedEventArgs e)
         {
-            _languageService.SetLanguage(Services.Language.English);
-            UpdateUIWithCurrentLanguage();
+            Console.WriteLine("🔤 ENGLISH BUTTON CLICKED - CAPTURING USER CHOICE");
             
-            // Force refresh topics if they exist
-            if (_currentUser != null && _currentTopics != null && _currentTopics.Count > 0)
+            // Enhanced visual feedback - highlight the clicked button
+            if (EnglishButton != null)
+            {
+                // Make English button very prominent when selected
+                EnglishButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LimeGreen);
+                EnglishButton.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.White);
+                EnglishButton.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.DarkGreen);
+                EnglishButton.BorderThickness = new Thickness(3);
+                EnglishButton.FontWeight = FontWeights.Bold;
+                EnglishButton.FontSize = 16;
+                EnglishButton.Content = "✅ ENGLISH SELECTED";
+            }
+            if (BurmeseButton != null)
+            {
+                // Make Burmese button less prominent when not selected
+                BurmeseButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightGray);
+                BurmeseButton.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Gray);
+                BurmeseButton.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Gray);
+                BurmeseButton.BorderThickness = new Thickness(1);
+                BurmeseButton.FontWeight = FontWeights.Normal;
+                BurmeseButton.FontSize = 14;
+                BurmeseButton.Content = "🇲🇲 ဗမာ";
+            }
+            
+            // Capture user's language choice
+            var chosenLanguage = _languageService.CaptureUserLanguageChoice(true, false);
+            
+            // Apply the user's choice
+            _languageService.ApplyUserLanguageChoice(chosenLanguage);
+            
+            // Update all UI elements based on chosen language
+            if (chosenLanguage == Services.Language.English)
+            {
+                _uiManager.UpdateAllUIElementsToEnglish();
+            }
+            else
+            {
+                _uiManager.UpdateAllUIElementsToBurmese();
+            }
+            
+            // Force UI refresh
+            this.InvalidateVisual();
+            this.UpdateLayout();
+            
+            // Clear chat and add welcome message in chosen language
+            if (ChatPanel != null)
+            {
+                ChatPanel.Children.Clear();
+                if (chosenLanguage == Services.Language.English)
+                {
+                    AddMessageToChat("Hello! I'm here to help you learn about safe and healthy topics. You can ask me questions or click the Topics button to see what we can learn about together!", false);
+                }
+                else
+                {
+                    AddMessageToChat("မင်္ဂလာပါ! ကျွန်တော်က လုံခြုံပြီး ကျန်းမာသော အကြောင်းအရာများအကြောင်း သင်ယူရန် ကူညီပေးရန် ဤနေရာတွင် ရှိပါတယ်။ သင်မေးခွန်းများ မေးနိုင်ပြီး သို့မဟုတ် ခေါင်းစဉ်များ ခလုတ်ကို နှိပ်ပြီး ကျွန်တော်တို့ အတူတကွ သင်ယူနိုင်သော အရာများကို ကြည့်နိုင်ပါတယ်!", false);
+                }
+            }
+            
+            // Refresh content to show translations in chosen language
+            if (_currentUser != null)
             {
                 _currentTopics = _contentService.GetTopicsForAge(_currentUser.Age);
+                Console.WriteLine($"✅ Refreshed {_currentTopics.Count} topics in {chosenLanguage}");
+                
+                // Refresh visible content if topics popup is open
                 if (TopicsPopup.Visibility == Visibility.Visible)
                 {
                     DisplayTopicsInPopup();
+                    Console.WriteLine($"✅ Refreshed visible topics popup in {chosenLanguage}");
                 }
             }
+            
+            Console.WriteLine($"✅ USER LANGUAGE CHOICE APPLIED: {chosenLanguage}");
+            
+            // Refresh topics and questions content
+            if (_currentUser != null)
+            {
+                _currentTopics = _contentService.GetTopicsForAge(_currentUser.Age);
+                
+                // Refresh the currently visible tab
+                if (TopicsTab != null && TopicsTab.Foreground.ToString().Contains("39, 174, 96")) // Topics tab is active
+                {
+                    _contentManager.ShowTopicsTab();
+                }
+                else if (QuestionsTab != null && QuestionsTab.Foreground.ToString().Contains("39, 174, 96")) // Questions tab is active
+                {
+                    _contentManager.ShowQuestionsTab();
+                }
+            }
+        }
+        
+        private void UpdateAllUIElementsToEnglish()
+        {
+            // Language selection screen
+            if (LanguageTitle != null)
+                LanguageTitle.Text = "Choose Language";
+            if (ContinueButton != null)
+                ContinueButton.Content = "✨ Continue";
+            
+            // Main interface buttons
+            if (TopicsButton != null)
+                TopicsButton.Content = "📚 Topics";
+            if (SendDailyLogButton != null)
+                SendDailyLogButton.Content = "📧 Send Daily Log";
+            if (TestEmailButton != null)
+                TestEmailButton.Content = "🧪 Test";
+            if (ExitButton != null)
+                ExitButton.Content = "🚪 Exit";
+            
+            // Form labels
+            if (NameLabel != null)
+                NameLabel.Text = "Enter your name:";
+            if (UsernameLabel != null)
+                UsernameLabel.Text = "Enter username:";
+            if (PasswordLabel != null)
+                PasswordLabel.Text = "Enter password:";
+            if (AgeLabel != null)
+                AgeLabel.Text = "Select your age:";
+            if (ParentNameLabel != null)
+                ParentNameLabel.Text = "Parent/Guardian Name:";
+            if (ParentEmailLabel != null)
+                ParentEmailLabel.Text = "Parent/Guardian Email:";
+            if (StartButton != null)
+                StartButton.Content = "Start Learning";
+            if (LoginButton != null)
+                LoginButton.Content = "Login";
+            if (LoginTitle != null)
+                LoginTitle.Text = "Welcome Back!";
+            if (LoginSubtitle != null)
+                LoginSubtitle.Text = "Please sign in to continue your learning journey";
+            if (WelcomeTitle != null)
+                WelcomeTitle.Text = "⭐ Little Star";
+            if (WelcomeSubtitle != null)
+                WelcomeSubtitle.Text = "Safe and Healthy Learning Platform for Children";
+            if (LoginUsernameLabel != null)
+                LoginUsernameLabel.Text = "Username:";
+            if (LoginPasswordLabel != null)
+                LoginPasswordLabel.Text = "Password:";
+            
+            // Language buttons
+            if (EnglishButton != null)
+                EnglishButton.Content = "🇺🇸 English";
+            if (BurmeseButton != null)
+                BurmeseButton.Content = "🇲🇲 ဗမာ";
+            
+            // Chat input
+            if (ChatInput != null)
+                ChatInput.Text = "Type your message here...";
+            if (SendButton != null)
+                SendButton.Content = "Send";
+            
+            // Update age combobox
+            UpdateAgeComboBox();
+            
+            // Topics popup
+            if (TopicsTitle != null)
+                TopicsTitle.Text = "Learning Topics";
+            if (TopicsTab != null)
+                TopicsTab.Content = "Topics";
+            if (QuestionsTab != null)
+                QuestionsTab.Content = "Questions";
+            if (BlogsTab != null)
+                BlogsTab.Content = "Blogs";
+            if (CloseTopicsButton != null)
+                CloseTopicsButton.Content = "Close";
         }
 
         private void BurmeseButton_Click(object sender, RoutedEventArgs e)
         {
-            _languageService.SetLanguage(Services.Language.Burmese);
-            UpdateUIWithCurrentLanguage();
+            Console.WriteLine("🇲🇲 BURMESE BUTTON CLICKED - CAPTURING USER CHOICE");
             
-            // Force refresh topics if they exist
-            if (_currentUser != null && _currentTopics != null && _currentTopics.Count > 0)
+            // Enhanced visual feedback - highlight the clicked button
+            if (BurmeseButton != null)
+            {
+                // Make Burmese button very prominent when selected
+                BurmeseButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LimeGreen);
+                BurmeseButton.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.White);
+                BurmeseButton.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.DarkGreen);
+                BurmeseButton.BorderThickness = new Thickness(3);
+                BurmeseButton.FontWeight = FontWeights.Bold;
+                BurmeseButton.FontSize = 16;
+                BurmeseButton.Content = "✅ ဗမာ ရွေးချယ်ပြီး";
+            }
+            if (EnglishButton != null)
+            {
+                // Make English button less prominent when not selected
+                EnglishButton.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightGray);
+                EnglishButton.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Gray);
+                EnglishButton.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Gray);
+                EnglishButton.BorderThickness = new Thickness(1);
+                EnglishButton.FontWeight = FontWeights.Normal;
+                EnglishButton.FontSize = 14;
+                EnglishButton.Content = "🇺🇸 English";
+            }
+            
+            // Capture user's language choice
+            var chosenLanguage = _languageService.CaptureUserLanguageChoice(false, true);
+            
+            // Apply the user's choice
+            _languageService.ApplyUserLanguageChoice(chosenLanguage);
+            
+            // Update all UI elements based on chosen language
+            if (chosenLanguage == Services.Language.English)
+            {
+                _uiManager.UpdateAllUIElementsToEnglish();
+            }
+            else
+            {
+                _uiManager.UpdateAllUIElementsToBurmese();
+            }
+            
+            // Force UI refresh
+            this.InvalidateVisual();
+            this.UpdateLayout();
+            
+            // Clear chat and add welcome message in chosen language
+            if (ChatPanel != null)
+            {
+                ChatPanel.Children.Clear();
+                if (chosenLanguage == Services.Language.English)
+                {
+                    AddMessageToChat("Hello! I'm here to help you learn about safe and healthy topics. You can ask me questions or click the Topics button to see what we can learn about together!", false);
+                }
+                else
+                {
+                    AddMessageToChat("မင်္ဂလာပါ! ကျွန်တော်က လုံခြုံပြီး ကျန်းမာသော အကြောင်းအရာများအကြောင်း သင်ယူရန် ကူညီပေးရန် ဤနေရာတွင် ရှိပါတယ်။ သင်မေးခွန်းများ မေးနိုင်ပြီး သို့မဟုတ် ခေါင်းစဉ်များ ခလုတ်ကို နှိပ်ပြီး ကျွန်တော်တို့ အတူတကွ သင်ယူနိုင်သော အရာများကို ကြည့်နိုင်ပါတယ်!", false);
+                }
+            }
+            
+            // Refresh content to show translations in chosen language
+            if (_currentUser != null)
             {
                 _currentTopics = _contentService.GetTopicsForAge(_currentUser.Age);
+                Console.WriteLine($"✅ Refreshed {_currentTopics.Count} topics in {chosenLanguage}");
+                
+                // Refresh visible content if topics popup is open
                 if (TopicsPopup.Visibility == Visibility.Visible)
                 {
                     DisplayTopicsInPopup();
+                    Console.WriteLine($"✅ Refreshed visible topics popup in {chosenLanguage}");
                 }
             }
+            
+            Console.WriteLine($"✅ USER LANGUAGE CHOICE APPLIED: {chosenLanguage}");
+            
+            // Refresh topics and questions content
+            if (_currentUser != null)
+            {
+                _currentTopics = _contentService.GetTopicsForAge(_currentUser.Age);
+                
+                // Refresh the currently visible tab
+                if (TopicsTab != null && TopicsTab.Foreground.ToString().Contains("39, 174, 96")) // Topics tab is active
+                {
+                    _contentManager.ShowTopicsTab();
+                }
+                else if (QuestionsTab != null && QuestionsTab.Foreground.ToString().Contains("39, 174, 96")) // Questions tab is active
+                {
+                    _contentManager.ShowQuestionsTab();
+                }
+            }
+        }
+        
+        private void UpdateAllUIElementsToBurmese()
+        {
+            // Language selection screen
+            if (LanguageTitle != null)
+                LanguageTitle.Text = "ဘာသာစကား ရွေးချယ်ပါ";
+            if (ContinueButton != null)
+                ContinueButton.Content = "ဆက်လက်လုပ်ဆောင်ရန်";
+            
+            // Main interface buttons
+            if (TopicsButton != null)
+                TopicsButton.Content = "📚 ခေါင်းစဉ်များ";
+            if (SendDailyLogButton != null)
+                SendDailyLogButton.Content = "📧 နေ့စဉ် လော့ဂ်ပို့ပေးရန်";
+            if (TestEmailButton != null)
+                TestEmailButton.Content = "🧪 စမ်းသပ်ရန်";
+            if (ExitButton != null)
+                ExitButton.Content = "🚪 ထွက်ရန်";
+            
+            // Form labels
+            if (NameLabel != null)
+                NameLabel.Text = "သင့်နာမည်ကို ရိုက်ထည့်ပါ:";
+            if (UsernameLabel != null)
+                UsernameLabel.Text = "အသုံးပြုသူအမည်ကို ရိုက်ထည့်ပါ:";
+            if (PasswordLabel != null)
+                PasswordLabel.Text = "စကားဝှက်ကို ရိုက်ထည့်ပါ:";
+            if (AgeLabel != null)
+                AgeLabel.Text = "သင့်အသက်ကို ရွေးချယ်ပါ:";
+            if (ParentNameLabel != null)
+                ParentNameLabel.Text = "မိဘ/အုပ်ထိန်းသူ၏ နာမည်:";
+            if (ParentEmailLabel != null)
+                ParentEmailLabel.Text = "မိဘ/အုပ်ထိန်းသူ၏ အီးမေးလ်:";
+            if (StartButton != null)
+                StartButton.Content = "သင်ယူမှု စတင်ရန်";
+            if (LoginButton != null)
+                LoginButton.Content = "လော့ဂ်အင်ဝင်ရန်";
+            if (LoginTitle != null)
+                LoginTitle.Text = "ပြန်လည်ကြိုဆိုပါတယ်!";
+            if (LoginSubtitle != null)
+                LoginSubtitle.Text = "သင့်သင်ယူမှု ခရီးကို ဆက်လက်လုပ်ဆောင်ရန် ကျေးဇူးပြု၍ ဝင်ရောက်ပါ";
+            if (WelcomeTitle != null)
+                WelcomeTitle.Text = "⭐ Little Star";
+            if (WelcomeSubtitle != null)
+                WelcomeSubtitle.Text = "ကလေးများအတွက် လုံခြုံပြီး ကျန်းမာသော သင်ယူမှု ပလက်ဖောင်း";
+            if (LoginUsernameLabel != null)
+                LoginUsernameLabel.Text = "အသုံးပြုသူအမည်:";
+            if (LoginPasswordLabel != null)
+                LoginPasswordLabel.Text = "စကားဝှက်:";
+            
+            // Language buttons
+            if (EnglishButton != null)
+                EnglishButton.Content = "🇺🇸 English";
+            if (BurmeseButton != null)
+                BurmeseButton.Content = "🇲🇲 ဗမာ";
+            
+            // Chat input
+            if (ChatInput != null)
+                ChatInput.Text = "သင့်စာကို ဤနေရာတွင် ရိုက်ထည့်ပါ...";
+            if (SendButton != null)
+                SendButton.Content = "ပို့ရန်";
+            
+            // Update age combobox
+            UpdateAgeComboBox();
+            
+            // Topics popup
+            if (TopicsTitle != null)
+                TopicsTitle.Text = "သင်ယူမှု ခေါင်းစဉ်များ";
+            if (TopicsTab != null)
+                TopicsTab.Content = "ခေါင်းစဉ်များ";
+            if (QuestionsTab != null)
+                QuestionsTab.Content = "မေးခွန်းများ";
+            if (BlogsTab != null)
+                BlogsTab.Content = "ဘလော့များ";
+            if (CloseTopicsButton != null)
+                CloseTopicsButton.Content = "ပိတ်ရန်";
         }
 
         private void ContinueButton_Click(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine("🔄 ContinueButton_Click - Showing welcome panel");
-            LanguagePanel.Visibility = Visibility.Collapsed;
-            WelcomePanel.Visibility = Visibility.Visible;
-            UpdateUIWithCurrentLanguage();
+            Console.WriteLine("🔄 ContinueButton_Click - Checking for existing users");
             
-            // Ensure form is cleared and button is visible
-            ClearFormFields();
-            EnsureButtonVisible();
+            // Use the direct language update methods instead of translation service
+            if (_languageService.CurrentLanguage == Services.Language.English)
+            {
+                _uiManager.UpdateAllUIElementsToEnglish();
+                Console.WriteLine("✅ Updated to English using direct method");
+            }
+            else
+            {
+                _uiManager.UpdateAllUIElementsToBurmese();
+                Console.WriteLine("✅ Updated to Burmese using direct method");
+            }
+            
+            ShowLoginOrRegister();
         }
 
         private void UpdateUIWithCurrentLanguage()
         {
-            // Update language selection screen
-            LanguageTitle.Text = _languageService.GetText("select_language");
-            EnglishButton.Content = _languageService.GetText("language_english");
-            BurmeseButton.Content = _languageService.GetText("language_burmese");
-            ContinueButton.Content = _languageService.GetText("continue_button");
-
-            // Update welcome screen
-            WelcomeTitle.Text = _languageService.GetText("welcome_title");
-            WelcomeSubtitle.Text = _languageService.GetText("welcome_subtitle");
-            NameLabel.Text = _languageService.GetText("enter_name");
-            AgeLabel.Text = _languageService.GetText("select_age");
-            ParentNameLabel.Text = _languageService.GetText("parent_name");
-            ParentEmailLabel.Text = _languageService.GetText("parent_email");
-            EmailNotificationsCheckBox.Content = _languageService.GetText("email_notifications");
-            StartButton.Content = _languageService.GetText("start_button");
-
-            // Update main screen - MainTitle doesn't exist in new UI
-            TopicsButton.Content = _languageService.GetText("topics_button");
-            ChatInput.Text = _languageService.GetText("chat_input_placeholder");
-            SendButton.Content = _languageService.GetText("send_button");
-
-            // Update topics popup
-            TopicsTitle.Text = _languageService.GetText("topics_title");
-            TopicsTab.Content = _languageService.GetText("topics_tab");
-            QuestionsTab.Content = _languageService.GetText("questions_tab");
-            BlogsTab.Content = _languageService.GetText("blogs_tab");
-            CloseTopicsButton.Content = _languageService.GetText("close_button");
+            // Use direct language update methods instead of translation service
+            if (_languageService.CurrentLanguage == Services.Language.English)
+            {
+                _uiManager.UpdateAllUIElementsToEnglish();
+                Console.WriteLine("✅ UpdateUIWithCurrentLanguage - Updated to English");
+            }
+            else
+            {
+                _uiManager.UpdateAllUIElementsToBurmese();
+                Console.WriteLine("✅ UpdateUIWithCurrentLanguage - Updated to Burmese");
+            }
 
             // Update age combo box items
             UpdateAgeComboBox();
@@ -1291,6 +1632,22 @@ namespace ChildSafeSexEducation.Desktop
                 }
                 DisplayTopicsInPopup();
             }
+            
+            // Always refresh the main content area (topics and questions tabs)
+            if (_currentUser != null)
+            {
+                _currentTopics = _contentService.GetTopicsForAge(_currentUser.Age);
+                
+                // Refresh the currently visible tab
+                if (TopicsTab.Foreground.ToString().Contains("39, 174, 96")) // Topics tab is active
+                {
+                    _contentManager.ShowTopicsTab();
+                }
+                else if (QuestionsTab.Foreground.ToString().Contains("39, 174, 96")) // Questions tab is active
+                {
+                    _contentManager.ShowQuestionsTab();
+                }
+            }
         }
 
         private void UpdateAgeComboBox()
@@ -1298,9 +1655,19 @@ namespace ChildSafeSexEducation.Desktop
             AgeComboBox.Items.Clear();
             for (int age = 8; age <= 15; age++)
             {
+                string ageText;
+                if (_languageService.CurrentLanguage == Services.Language.English)
+                {
+                    ageText = $"{age} years old";
+                }
+                else
+                {
+                    ageText = $"{age} နှစ်";
+                }
+                
                 var item = new ComboBoxItem
                 {
-                    Content = _languageService.GetText($"age_{age}"),
+                    Content = ageText,
                     Tag = age
                 };
                 AgeComboBox.Items.Add(item);

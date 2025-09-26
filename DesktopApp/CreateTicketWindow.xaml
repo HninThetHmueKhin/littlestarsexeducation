@@ -1,0 +1,141 @@
+<Window x:Class="ChildSafeSexEducation.Desktop.CreateTicketWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Create New Ticket" 
+        Height="500" Width="600"
+        WindowStartupLocation="CenterScreen"
+        Background="#F8F9FA"
+        ResizeMode="NoResize">
+    
+    <Window.Resources>
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="#27AE60"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="5" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" 
+                   Text="Create New Error Ticket" 
+                   FontSize="20" 
+                   FontWeight="Bold" 
+                   Foreground="#2C3E50" 
+                   HorizontalAlignment="Center" 
+                   Margin="0,0,0,30"/>
+
+        <!-- Form -->
+        <StackPanel Grid.Row="1">
+            <StackPanel Margin="0,0,0,20">
+                <TextBlock Text="Title:" 
+                           FontSize="14" 
+                           FontWeight="Bold" 
+                           Foreground="#2C3E50" 
+                           Margin="0,0,0,5"/>
+                <TextBox x:Name="TitleTextBox" 
+                         FontSize="14" 
+                         Padding="10,8" 
+                         BorderBrush="#BDC3C7" 
+                         BorderThickness="1" 
+                         Background="White"/>
+            </StackPanel>
+
+            <StackPanel Margin="0,0,0,20">
+                <TextBlock Text="Description:" 
+                           FontSize="14" 
+                           FontWeight="Bold" 
+                           Foreground="#2C3E50" 
+                           Margin="0,0,0,5"/>
+                <TextBox x:Name="DescriptionTextBox" 
+                         FontSize="14" 
+                         Padding="10,8" 
+                         BorderBrush="#BDC3C7" 
+                         BorderThickness="1" 
+                         Background="White"
+                         Height="100"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto"/>
+            </StackPanel>
+
+            <Grid Margin="0,0,0,20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                    <TextBlock Text="Priority:" 
+                               FontSize="14" 
+                               FontWeight="Bold" 
+                               Foreground="#2C3E50" 
+                               Margin="0,0,0,5"/>
+                    <ComboBox x:Name="PriorityComboBox" 
+                              FontSize="14" 
+                              Height="35" 
+                              Padding="10,8">
+                        <ComboBoxItem Content="Low" Tag="Low"/>
+                        <ComboBoxItem Content="Medium" Tag="Medium" IsSelected="True"/>
+                        <ComboBoxItem Content="High" Tag="High"/>
+                        <ComboBoxItem Content="Critical" Tag="Critical"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                    <TextBlock Text="Assign To:" 
+                               FontSize="14" 
+                               FontWeight="Bold" 
+                               Foreground="#2C3E50" 
+                               Margin="0,0,0,5"/>
+                    <ComboBox x:Name="AssignedToComboBox" 
+                              FontSize="14" 
+                              Height="35" 
+                              Padding="10,8">
+                        <ComboBoxItem Content="Admin" Tag="Admin" IsSelected="True"/>
+                        <ComboBoxItem Content="Developer" Tag="Developer"/>
+                        <ComboBoxItem Content="Support" Tag="Support"/>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="2" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Center" 
+                    Margin="0,20,0,0">
+            <Button x:Name="CreateButton" 
+                    Content="Create Ticket" 
+                    Style="{StaticResource ModernButton}"
+                    Click="CreateButton_Click"
+                    Margin="0,0,10,0"/>
+            <Button x:Name="CancelButton" 
+                    Content="Cancel" 
+                    Style="{StaticResource ModernButton}"
+                    Background="#95A5A6"
+                    Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

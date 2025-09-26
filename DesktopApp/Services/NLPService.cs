@@ -39,6 +39,18 @@ namespace ChildSafeSexEducation.Desktop.Services
             return "I'd love to help you learn! You can ask about:\n• Body parts and keeping clean\n• Personal safety and boundaries\n• Growing up and changes\n• Healthy friendships and relationships\n\nWhat would you like to know more about?";
         }
 
+        public string ProcessMessage(string userInput)
+        {
+            // Check for inappropriate content first
+            if (ContainsInappropriateContent(userInput))
+            {
+                return "It is not appropriate.";
+            }
+
+            // Return guidance message for appropriate content
+            return "I'm here to help you learn about safe and healthy topics. Please ask about body parts, personal safety, growing up, or healthy relationships.";
+        }
+
         private List<string> ExtractKeywords(string input)
         {
             var stopWords = new HashSet<string> { "what", "how", "why", "when", "where", "is", "are", "do", "does", "can", "could", "should", "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by" };

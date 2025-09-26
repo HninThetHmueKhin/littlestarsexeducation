@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "com.littlestar.childsafesexeducation.app-merged_res-32:/layout_activity_main.xml.flat",
+        "source": "com.littlestar.childsafesexeducation.app-main-34:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.littlestar.childsafesexeducation.app-merged_res-32:/layout_item_topic.xml.flat",
+        "source": "com.littlestar.childsafesexeducation.app-main-34:/layout/item_topic.xml"
+    },
+    {
+        "merged": "com.littlestar.childsafesexeducation.app-merged_res-32:/layout_item_chat_message.xml.flat",
+        "source": "com.littlestar.childsafesexeducation.app-main-34:/layout/item_chat_message.xml"
+    },
+    {
+        "merged": "com.littlestar.childsafesexeducation.app-merged_res-32:/drawable_chat_bubble_bot.xml.flat",
+        "source": "com.littlestar.childsafesexeducation.app-main-34:/drawable/chat_bubble_bot.xml"
+    },
+    {
+        "merged": "com.littlestar.childsafesexeducation.app-merged_res-32:/drawable_chat_bubble_user.xml.flat",
+        "source": "com.littlestar.childsafesexeducation.app-main-34:/drawable/chat_bubble_user.xml"
+    }
+]

@@ -7,6 +7,7 @@ namespace ChildSafeSexEducation.Desktop.Models
         public string Description { get; set; } = string.Empty;
         public int MinAge { get; set; }
         public int MaxAge { get; set; }
+        public string Icon { get; set; } = string.Empty;
         public List<Question> Questions { get; set; } = new List<Question>();
     }
 

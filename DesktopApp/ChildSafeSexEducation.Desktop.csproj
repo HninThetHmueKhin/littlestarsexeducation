@@ -23,4 +23,8 @@
     <Resource Include="Images\**\*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="MainWindow_Original_Backup.xaml.cs" />
+  </ItemGroup>
+
 </Project>

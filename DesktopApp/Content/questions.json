@@ -1,0 +1,110 @@
+[
+  {
+    "id": 1,
+    "questionText": "question_what_private_parts",
+    "answer": "answer_private_parts",
+    "topicId": 1,
+    "minAge": 8,
+    "maxAge": 12,
+    "difficulty": "easy"
+  },
+  {
+    "id": 2,
+    "questionText": "question_why_keep_clean",
+    "answer": "answer_keep_clean",
+    "topicId": 1,
+    "minAge": 8,
+    "maxAge": 15,
+    "difficulty": "easy"
+  },
+  {
+    "id": 3,
+    "questionText": "question_what_private_parts_2",
+    "answer": "answer_private_parts_2",
+    "topicId": 1,
+    "minAge": 10,
+    "maxAge": 15,
+    "difficulty": "medium"
+  },
+  {
+    "id": 4,
+    "questionText": "question_how_stay_safe",
+    "answer": "answer_stay_safe",
+    "topicId": 2,
+    "minAge": 8,
+    "maxAge": 15,
+    "difficulty": "easy"
+  },
+  {
+    "id": 5,
+    "questionText": "question_good_bad_touch",
+    "answer": "answer_good_bad_touch",
+    "topicId": 2,
+    "minAge": 8,
+    "maxAge": 12,
+    "difficulty": "medium"
+  },
+  {
+    "id": 6,
+    "questionText": "question_who_trust",
+    "answer": "answer_who_trust",
+    "topicId": 2,
+    "minAge": 10,
+    "maxAge": 15,
+    "difficulty": "medium"
+  },
+  {
+    "id": 7,
+    "questionText": "question_what_puberty",
+    "answer": "answer_puberty",
+    "topicId": 3,
+    "minAge": 10,
+    "maxAge": 15,
+    "difficulty": "medium"
+  },
+  {
+    "id": 8,
+    "questionText": "question_confused_changes",
+    "answer": "answer_confused_changes",
+    "topicId": 3,
+    "minAge": 10,
+    "maxAge": 15,
+    "difficulty": "medium"
+  },
+  {
+    "id": 9,
+    "questionText": "question_when_talk_changes",
+    "answer": "answer_when_talk_changes",
+    "topicId": 3,
+    "minAge": 10,
+    "maxAge": 15,
+    "difficulty": "easy"
+  },
+  {
+    "id": 10,
+    "questionText": "question_how_make_friends",
+    "answer": "answer_make_friends",
+    "topicId": 4,
+    "minAge": 8,
+    "maxAge": 15,
+    "difficulty": "easy"
+  },
+  {
+    "id": 11,
+    "questionText": "question_someone_mean",
+    "answer": "answer_someone_mean",
+    "topicId": 4,
+    "minAge": 8,
+    "maxAge": 12,
+    "difficulty": "medium"
+  },
+  {
+    "id": 12,
+    "questionText": "question_bullying_help",
+    "answer": "answer_bullying_help",
+    "topicId": 4,
+    "minAge": 8,
+    "maxAge": 15,
+    "difficulty": "medium"
+  }
+]
